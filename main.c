@@ -104,7 +104,7 @@ int execute(char **args) {
     } else {
         // Parent process: wait for child
         do {
-            wpid = waitpid(pid, &status, 0); // Blocking wait
+            //wpid = waitpid(pid, &status, 0); // Blocking wait
         } while (!WIFEXITED(status) && !WIFSIGNALED(status));
     }
 
