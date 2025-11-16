@@ -14,7 +14,7 @@ char **split_line(char *line);
 // Function to execute the command
 int execute(char **args);
 
-int main() {
+int main(int argc, char **argv) {
     char *line;
     char **args;
     int status = 1;
@@ -87,8 +87,8 @@ int execute(char **args) {
     }
 
     // Process execution (fork and execvp) goes here!
-    pid_t pid;//, wpid;
-    int status = 1;
+    pid_t pid, wpid;
+    int status;
 
     pid = fork();
     if (pid == 0) {
@@ -104,7 +104,7 @@ int execute(char **args) {
     } else {
         // Parent process: wait for child
         do {
-            //wpid = waitpid(pid, &status, 0); // Blocking wait
+            wpid = waitpid(pid, &status, 0); // Blocking wait
         } while (!WIFEXITED(status) && !WIFSIGNALED(status));
     }
 
