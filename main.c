@@ -87,7 +87,7 @@ int execute(char **args) {
     }
 
     // Process execution (fork and execvp) goes here!
-    pid_t pid//, wpid;
+    pid_t pid;//, wpid;
     int status = 1;
 
     pid = fork();
