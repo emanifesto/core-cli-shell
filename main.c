@@ -14,7 +14,7 @@ char **split_line(char *line);
 // Function to execute the command
 int execute(char **args);
 
-int main(int argc, char **argv) {
+int main() {
     char *line;
     char **args;
     int status = 1;
@@ -87,7 +87,7 @@ int execute(char **args) {
     }
 
     // Process execution (fork and execvp) goes here!
-    pid_t pid, wpid;
+    pid_t pid;//, wpid;
     int status;
 
     pid = fork();
