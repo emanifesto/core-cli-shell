@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <sys/types.h>
+#include <signal.h>
 
 // Function to read the command line
 char *read_line(void);
@@ -14,12 +15,20 @@ char **split_line(char *line);
 // Function to execute the command
 int execute(char **args);
 
+void sigchld_handler(int sig) {
+    (void)sig;
+    while (waitpid(-1, NULL, WNOHANG) > 0);
+}
+
 int main() {
     char *line;
     char **args;
     int status = 1;
 
     printf("Starting simple C shell...\n");
+
+    // Set up the SIGCHLD handler
+    signal(SIGCHLD, sigchld_handler);
 
     do {
         // 1. READ
