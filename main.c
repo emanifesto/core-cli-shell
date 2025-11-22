@@ -108,15 +108,16 @@ int execute(char **args) {
     if (args[0] == NULL) {
         return 1; // Empty command
     }
-    if (strcmp(args[0], "exit\n") == 0) { // Note: may need to strip newline
-        return 0; // Signal main loop to terminate
-    }
+   // Built-in exit/quit
+    if (strcmp(args[0], "exit") == 0 || strcmp(args[0], "quit") == 0)
+        return 0;
 
     // Process execution (fork and execvp) goes here!
     pid_t pid;//, wpid;
     int status;
 
     pid = fork();
+
     if (pid == 0) {
         // Child process: execute the command
         // NOTE: Need to strip newline from the last argument before execvp
@@ -126,11 +127,13 @@ int execute(char **args) {
         exit(EXIT_FAILURE);
     } else if (pid < 0) {
         // Error forking
-        perror("myshell");
+        perror("myshell: fork error");
     } else {
         // Parent process: wait for child
         do {
-            //wpid = waitpid(pid, &status, 0); // Blocking wait
+           if (waitpid(pid, &status, 0) == -1) {
+            perror("myshell: waitpid error");
+            }
         } while (!WIFEXITED(status) && !WIFSIGNALED(status));
     }
 
