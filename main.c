@@ -46,6 +46,9 @@ int main() {
         if (args) {
             // Free all argument pointers before freeing the array itself
             // NOTE: More robust memory cleanup may be required depending on implementation.
+            for (int i = 0; args[i] != NULL; i++) {
+                free(args[i]);
+            }
             free(args);
         }
 
@@ -142,6 +145,45 @@ int execute(char **args) {
         } else {
             // Background: do NOT wait
             printf("[background pid %d]\n", pid);
+        }
+    }
+
+    // Pipe detection
+    for (int i = 0; args[i] != NULL; i++) {
+        if (strcmp(args[i], "|") == 0) {
+            args[i] = NULL;  // split the command
+
+            char **left = args;
+            char **right = &args[i+1];
+
+            int pipefd[2];
+            pipe(pipefd);
+
+            pid_t p1 = fork();
+            if (p1 == 0) {
+                // Left child
+                dup2(pipefd[1], STDOUT_FILENO);
+                close(pipefd[0]);
+                execvp(left[0], left);
+                perror("execvp left");
+                exit(1);
+            }
+
+            pid_t p2 = fork();
+            if (p2 == 0) {
+                // Right child
+                dup2(pipefd[0], STDIN_FILENO);
+                close(pipefd[1]);
+                execvp(right[0], right);
+                perror("execvp right");
+                exit(1);
+            }
+
+            close(pipefd[0]);
+            close(pipefd[1]);
+            waitpid(p1, NULL, 0);
+            waitpid(p2, NULL, 0);
+            return 1;
         }
     }
 
