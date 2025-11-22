@@ -64,15 +64,41 @@ char *read_line(void) {
 }
 
 // STUB 2: Implement the logic to tokenize the input line
+
+#define TOK_BUFSIZE 64
+#define TOK_DELIM " \t\r\n\a"
+
 char **split_line(char *line) {
     // Implement using strtok() to separate tokens by space
     // and store them in a dynamically allocated char **
     // Remember to terminate the array with a NULL pointer!
     // For now, return a placeholder:
-    char **tokens = malloc(sizeof(char *) * 2);
-    if (!tokens) { perror("malloc failed"); exit(EXIT_FAILURE); }
-    tokens[0] = strdup(line); // Simplified: first token is the whole line
-    tokens[1] = NULL;
+    int bufsize = TOK_BUFSIZE, position = 0;
+    char **tokens = malloc(bufsize * sizeof(char *));
+    char *token;
+
+    if (!tokens) {
+        perror("myshell: allocation error");
+        exit(EXIT_FAILURE);
+    }
+
+    token = strtok(line, TOK_DELIM);
+    while (token != NULL) {
+        tokens[position] = strdup(token);
+        position++;
+
+        if (position >= bufsize) {
+            bufsize += TOK_BUFSIZE;
+            tokens = realloc(tokens, bufsize * sizeof(char *));
+            if (!tokens) {
+                perror("myshell: allocation error");
+                exit(EXIT_FAILURE);
+            }
+        }
+
+        token = strtok(NULL, TOK_DELIM);
+    }
+    tokens[position] = NULL;
     return tokens;
 }
 
