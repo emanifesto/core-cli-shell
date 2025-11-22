@@ -116,6 +116,26 @@ int execute(char **args) {
     pid_t pid;//, wpid;
     int status;
 
+    // Background job check
+    int background = 0;
+    int last = 0;
+    while (args[last] != NULL) last++;
+
+    if (last > 0 && strcmp(args[last - 1], "&") == 0) {
+        background = 1;
+        free(args[last - 1]);
+        args[last - 1] = NULL;  // Remove &
+    } else {
+        if (!background) {
+            // Foreground: wait
+            if (waitpid(pid, &status, 0) == -1)
+                perror("waitpid");
+        } else {
+            // Background: do NOT wait
+            printf("[background pid %d]\n", pid);
+        }
+    }
+
     pid = fork();
 
     if (pid == 0) {
